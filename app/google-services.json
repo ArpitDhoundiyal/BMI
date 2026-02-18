@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "188754450709",
+    "project_id": "bmi-app-aa19e",
+    "storage_bucket": "bmi-app-aa19e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188754450709:android:11d21ee52d4322a221711c",
+        "android_client_info": {
+          "package_name": "com.example.bmi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "188754450709-bf37009ohen3ih3qqhnanakq7an8pg0p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.bmi",
+            "certificate_hash": "58a69a07f90f8b926410756a251d180e54ed79ae"
+          }
+        },
+        {
+          "client_id": "188754450709-rtghdrqpcnkhd4j684jjbqb4baqc4fs6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCofFX_0smmiJofR-BejuEeM2RC6Yb1_pg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "188754450709-rtghdrqpcnkhd4j684jjbqb4baqc4fs6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
