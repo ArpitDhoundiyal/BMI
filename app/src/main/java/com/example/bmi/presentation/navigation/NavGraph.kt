@@ -4,8 +4,10 @@ import android.app.Activity
 import android.net.Uri
 import com.example.bmi.ui.screens.RegisterScreen
 
-
+import com.google.android.gms.common.api.ApiException
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.example.bmi.domain.model.Profile
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +24,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.ui.res.stringResource
+import com.example.bmi.R
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException
 
 
 @Composable
@@ -31,6 +38,7 @@ fun AppNavGraph(startDestination: String) {
     val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
     val context = LocalContext.current
+    val clientId = stringResource(R.string.default_web_client_id)
 
     NavHost(
         navController = navController,
@@ -42,18 +50,27 @@ fun AppNavGraph(startDestination: String) {
         composable("register") {
 
             RegisterScreen(
-
-                onRegisterClick = { username: String, email: String, password: String ->
+                onRegisterClick = { username, email, password ->
 
                     auth.createUserWithEmailAndPassword(email, password)
                         .addOnSuccessListener { result ->
 
-                            val uid = result.user?.uid
+                            val user = result.user
+
+                            // ✅ Send verification email
+                            user?.sendEmailVerification()
+
+                            val uid = user?.uid
 
                             uid?.let {
+                                val firstName = username
+                                    .trim()
+                                    .split(" ")
+                                    .firstOrNull()
+                                    .orEmpty()
 
                                 val userMap = mapOf(
-                                    "name" to username,
+                                    "name" to firstName,
                                     "email" to email
                                 )
 
@@ -61,18 +78,40 @@ fun AppNavGraph(startDestination: String) {
                                     .collection("users")
                                     .document(it)
                                     .set(userMap)
+                            }
 
-                                navController.navigate("home") {
-                                    popUpTo("register") { inclusive = true }
-                                }
+                            Toast.makeText(
+                                context,
+                                "Verification email sent. Please verify before login.",
+                                Toast.LENGTH_LONG
+                            ).show()
+
+                            auth.signOut()
+
+                            navController.navigate("login") {
+                                popUpTo("register") { inclusive = true }
                             }
                         }
+                        .addOnFailureListener { exception ->
 
-                        .addOnFailureListener {
-                            Toast.makeText(context, "Register Failed", Toast.LENGTH_SHORT).show()
+                            val errorMessage = when (exception) {
+
+                                is FirebaseAuthUserCollisionException ->
+                                    "Email already registered"
+
+                                is FirebaseAuthWeakPasswordException ->
+                                    "Password should be at least 6 characters"
+
+                                is FirebaseAuthInvalidCredentialsException ->
+                                    "Invalid email format"
+
+                                else ->
+                                    "Register Failed"
+                            }
+
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                         }
                 },
-
                 onNavigateToLogin = {
                     navController.navigate("login")
                 }
@@ -83,14 +122,112 @@ fun AppNavGraph(startDestination: String) {
 
         composable("login") {
 
+            val launcher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+
+                if (result.resultCode == Activity.RESULT_OK) {
+
+                    val task = GoogleSignIn
+                        .getSignedInAccountFromIntent(result.data)
+
+                    try {
+                        val account = task.getResult(ApiException::class.java)
+
+                        val credential = GoogleAuthProvider
+                            .getCredential(account.idToken, null)
+
+                        auth.signInWithCredential(credential)
+                            .addOnCompleteListener { loginTask ->
+
+                                if (loginTask.isSuccessful) {
+
+                                    val user = auth.currentUser
+                                    val uid = user?.uid
+
+                                    val fullName = user?.displayName ?: ""
+                                    val firstName = fullName
+                                        .trim()
+                                        .split(" ")
+                                        .firstOrNull()
+                                        .orEmpty()
+
+                                    val userMap = mapOf(
+                                        "name" to firstName,
+                                        "email" to (user?.email ?: "")
+                                    )
+
+                                    uid?.let {
+                                        FirebaseFirestore.getInstance()
+                                            .collection("users")
+                                            .document(it)
+                                            .set(userMap)
+                                    }
+
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Google Login Failed",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            context,
+                            "Google Sign-In Error",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
             LoginScreen(
 
                 onLoginClick = { email, password ->
 
+                    // Empty validation
+                    if (email.isBlank()) {
+                        Toast.makeText(context, "Email required", Toast.LENGTH_SHORT).show()
+                        return@LoginScreen
+                    }
+
+                    if (password.isBlank()) {
+                        Toast.makeText(context, "Password required", Toast.LENGTH_SHORT).show()
+                        return@LoginScreen
+                    }
+
+                    // Email format validation
+                    if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(context, "Enter valid email", Toast.LENGTH_SHORT).show()
+                        return@LoginScreen
+                    }
+
+                    // Firebase login
                     auth.signInWithEmailAndPassword(email, password)
                         .addOnSuccessListener {
-                            navController.navigate("home") {
-                                popUpTo("login") { inclusive = true }
+
+                            val user = auth.currentUser
+
+                            if (user?.isEmailVerified == true) {
+
+                                navController.navigate("home") {
+                                    popUpTo("login") { inclusive = true }
+                                }
+
+                            } else {
+
+                                Toast.makeText(
+                                    context,
+                                    "Please verify your email first",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                auth.signOut()
                             }
                         }
                         .addOnFailureListener { exception ->
@@ -110,13 +247,12 @@ fun AppNavGraph(startDestination: String) {
                     val googleSignInClient = GoogleSignIn.getClient(
                         context,
                         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestIdToken("188754450709-rtghdrqpcnkhd4j684jjbqb4baqc4fs6.apps.googleusercontent.com")
+                            .requestIdToken(clientId)
                             .requestEmail()
                             .build()
                     )
 
-                    val signInIntent = googleSignInClient.signInIntent
-                    (context as Activity).startActivityForResult(signInIntent, 1001)
+                    launcher.launch(googleSignInClient.signInIntent)
                 },
 
                 onNavigateToRegister = {

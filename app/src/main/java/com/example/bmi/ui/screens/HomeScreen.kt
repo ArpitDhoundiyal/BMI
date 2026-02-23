@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.bmi.domain.model.Profile
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 
@@ -70,6 +71,7 @@ fun HomeScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var selectedProfileId by remember { mutableStateOf<String?>(null) }
+
 
     if (showDialog) {
         AlertDialog(
@@ -97,7 +99,7 @@ fun HomeScreen(
                 onClick = { onAddClick() },
                 containerColor = Color(0xFF2196F3),
                 contentColor = Color.White,
-                modifier = Modifier.padding(bottom = 60.dp) // logout se upar
+                modifier = Modifier.padding(bottom = 60.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
@@ -118,6 +120,7 @@ fun HomeScreen(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
+
 
             Spacer(modifier = Modifier.height(20.dp))
 

@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -80,6 +82,16 @@ fun BmiScreen(
                 keyboardType = KeyboardType.Decimal
             ),
             singleLine = true,
+            trailingIcon = {
+                if (vm.heightState.value.isNotEmpty()) {
+                    IconButton(onClick = { vm.updateHeight("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear text"
+                        )
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -97,6 +109,16 @@ fun BmiScreen(
                 keyboardType = KeyboardType.Decimal
             ),
             singleLine = true,
+            trailingIcon = {
+                if (vm.heightState.value.isNotEmpty()) {
+                    IconButton(onClick = { vm.updateHeight("") }) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Clear text"
+                        )
+                    }
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
 

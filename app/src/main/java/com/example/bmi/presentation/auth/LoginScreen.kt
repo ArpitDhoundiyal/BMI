@@ -1,9 +1,16 @@
 package com.example.bmi.presentation.auth
-
+import android.app.Activity
+import android.util.Log
+import com.example.bmi.R
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -14,13 +21,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
-
+import com.google.firebase.auth.GoogleAuthProvider
 
 
 @Composable
@@ -35,6 +50,9 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val passwordFocusRequester = remember { FocusRequester() }
+
+
 
     Box(
         modifier = Modifier
@@ -77,6 +95,18 @@ fun LoginScreen(
                     onValueChange = { email = it },
                     label = { Text("Email") },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                                passwordFocusRequester.requestFocus()
+                            } else {
+                                Toast.makeText(context, "Invalid Email", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -105,6 +135,7 @@ fun LoginScreen(
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
+                        .focusRequester(passwordFocusRequester)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -119,7 +150,10 @@ fun LoginScreen(
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Login")
+                    Text(
+                        text = "Login",
+                        fontSize = 18.sp
+                        )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -132,10 +166,18 @@ fun LoginScreen(
                         .height(50.dp),
                     shape = RoundedCornerShape(12.dp)
                 ) {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.google),
+                        contentDescription = "Google",
+                        modifier = Modifier.size(24.dp)
+
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text("Continue with Google")
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 // FORGOT PASSWORD
                 TextButton(onClick = {

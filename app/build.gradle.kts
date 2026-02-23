@@ -95,6 +95,9 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("androidx.compose.material:material-icons-extended")
+    implementation(platform("androidx.compose:compose-bom:2026.01.01"))
+    implementation("io.coil-kt:coil-compose:2.6.0")
+
 
 
 }
