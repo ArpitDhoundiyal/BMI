@@ -24,11 +24,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +54,7 @@ fun ProfileScreen(
 
     var name by remember { mutableStateOf("") }
     var gender by remember { mutableStateOf("Male") }
+
 
     Box(
         modifier = Modifier
@@ -84,15 +90,39 @@ fun ProfileScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
+                val rainbowBrush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color(0xFFCE4552),
+                        Color(0xFFCD83E5),
+                        Color(0xFFAA8BE8),
+                        Color(0xFF77B8EA),
+                        Color(0xFF85F38B)
+
+                    )
+                )
+
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Enter Name") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),   // rounded border
+                    textStyle = if (gender == "Other") {
+                        TextStyle(brush = rainbowBrush,
+                            shadow = Shadow(
+                                color = Color.White.copy(alpha = 0.4f),
+                                blurRadius = 8f,
+                                offset = Offset(0f, 2f)
+                            )
+                        )
+
+                    } else {
+                        TextStyle.Default
+                    }
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = "Select Gender",
@@ -112,7 +142,7 @@ fun ProfileScreen(
                         label = { Text("Male") },
                         border = BorderStroke(
                             1.dp,
-                            if (gender == "Male") Color.Black else Color.Gray
+                            if (gender == "Male") Color(0xFF80BFEF) else Color.Gray
                         )
 
                     )
@@ -123,8 +153,28 @@ fun ProfileScreen(
                         label = { Text("Female") },
                         border = BorderStroke(
                             1.dp,
-                            if (gender == "Male") Color.Black else Color.Gray
+                            if (gender == "Female") Color(0xFFEF48C3) else Color.Gray
                         )
+                    )
+                    FilterChip(
+                        selected = gender == "Other",
+                        onClick = { gender = "Other" },
+                        label = { Text("Other") },
+                        border = if (gender == "Other") {
+                            BorderStroke(1.dp, rainbowBrush)
+                        } else {
+                            BorderStroke(1.dp, Color.Gray)
+                        }
+                    )
+                }
+                if (gender == "Other") {
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "We respect all identities 🌈",
+                        fontSize = 13.sp,
+                        color = Color.Gray,
+                        fontStyle = FontStyle.Italic
                     )
                 }
 

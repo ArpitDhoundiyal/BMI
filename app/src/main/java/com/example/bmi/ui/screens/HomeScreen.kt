@@ -51,6 +51,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,6 +73,7 @@ fun HomeScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     var selectedProfileId by remember { mutableStateOf<String?>(null) }
+
 
 
     if (showDialog) {
@@ -138,12 +141,22 @@ fun HomeScreen(
                 }
 
             } else {
+                val rainbowBrush = Brush.linearGradient(
+                    colors = listOf(
+                        Color(0xFFEF8E99),
+                        Color(0xFFE6AEEC),
+                        Color(0xFFA7CEF5),
+                        Color(0xFFA8F6AA),
+
+                    )
+                )
 
                 LazyColumn(
                     modifier = Modifier.weight(1f)
                 ) {
 
                     items(profiles) { profile ->
+                        val isOther = profile.gender == "Other"
 
                         val bmiColor = when {
                             profile.currentBmi == null -> Color.Gray
@@ -198,10 +211,20 @@ fun HomeScreen(
                                     Column(
                                         modifier = Modifier.weight(1f)
                                     ) {
+
                                         Text(
                                             text = profile.name,
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 18.sp
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            style = if (isOther) {
+                                                TextStyle(
+                                                    brush = rainbowBrush
+                                                )
+                                            } else {
+                                                TextStyle(
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
                                         )
                                         Text(
                                             text = profile.gender,

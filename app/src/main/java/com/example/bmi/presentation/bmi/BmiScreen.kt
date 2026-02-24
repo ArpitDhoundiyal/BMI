@@ -27,6 +27,7 @@ import androidx.navigation.NavController
 fun BmiScreen(
     profileId: String,
     name: String,
+    gender: String,
     navController: NavController,
     vm: BmiViewModel = viewModel()
 
@@ -111,7 +112,7 @@ fun BmiScreen(
             singleLine = true,
             trailingIcon = {
                 if (vm.heightState.value.isNotEmpty()) {
-                    IconButton(onClick = { vm.updateHeight("") }) {
+                    IconButton(onClick = { vm.updateWeight("") }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Clear text"
@@ -165,7 +166,7 @@ fun BmiScreen(
                 TextButton(
                     onClick = {
                         navController.navigate(
-                            "tips/${Uri.encode(name)}/${vm.weightState.value.toString()}/${vm.bmi}"
+                            "tips/${Uri.encode(name)}/${vm.weightState.value}/${vm.bmi}/$gender"
                         )
 
                     }
