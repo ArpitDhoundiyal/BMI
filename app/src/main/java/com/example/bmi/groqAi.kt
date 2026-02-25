@@ -11,7 +11,7 @@ import java.io.IOException
 
 object GroqAi {
 
-    private const val API_KEY = "Your_Api"
+    private const val API_KEY = "Api_Key"
     private val client = OkHttpClient()
 
     fun getTips(prompt: String, onResult: (String) -> Unit) {

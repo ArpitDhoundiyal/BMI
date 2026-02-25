@@ -67,7 +67,7 @@ fun HomeScreen(
     profiles: List<Profile>,
     onAddClick: () -> Unit,
     onLogoutClick: () -> Unit,
-    onProfileClick: (String, String) -> Unit,
+    onProfileClick: (String, String,String) -> Unit,
     onDeleteClick: (String) -> Unit
 ) {
 
@@ -143,10 +143,10 @@ fun HomeScreen(
             } else {
                 val rainbowBrush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFEF8E99),
-                        Color(0xFFE6AEEC),
-                        Color(0xFFA7CEF5),
-                        Color(0xFFA8F6AA),
+                        Color(0xFFF17985),
+                        Color(0xFFE392EF),
+                        Color(0xFF8FC0F1),
+                        Color(0xFF8FEC91),
 
                     )
                 )
@@ -171,7 +171,7 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
                                 .clickable {
-                                    onProfileClick(profile.id, profile.name)
+                                    onProfileClick(profile.id, profile.name,profile.gender)
                                 },
                             shape = RoundedCornerShape(18.dp),
                             elevation = CardDefaults.cardElevation(12.dp),

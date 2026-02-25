@@ -27,6 +27,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.bmi.R
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
@@ -57,7 +59,7 @@ fun AppNavGraph(startDestination: String) {
 
                             val user = result.user
 
-                            // ✅ Send verification email
+                            // Send verification email
                             user?.sendEmailVerification()
 
                             val uid = user?.uid
@@ -275,25 +277,47 @@ fun AppNavGraph(startDestination: String) {
             )
         }
 
-        composable("bmi/{profileId}/{name}") { backStackEntry ->
+        composable(
+            route = "bmi/{profileId}/{name}/{gender}"
+        ) { backStackEntry ->
 
-            val profileId = backStackEntry.arguments?.getString("profileId")?:""
+            val profileId = backStackEntry.arguments?.getString("profileId") ?: ""
             val name = backStackEntry.arguments?.getString("name") ?: ""
+            val gender = backStackEntry.arguments?.getString("gender") ?: "Other"
 
             BmiScreen(
                 profileId = profileId,
                 name = name,
+                gender = gender,
                 navController = navController
             )
         }
-        composable("tips/{name}/{weight}/{bmi}") { backStackEntry ->
+        composable(
+            route = "tips/{name}/{weight}/{bmi}/{gender}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("weight") { type = NavType.StringType },
+                navArgument("bmi") { type = NavType.StringType },
+                navArgument("gender") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
 
             val name = backStackEntry.arguments?.getString("name") ?: ""
-            val weight = backStackEntry.arguments?.getString("weight")?.toDoubleOrNull() ?: 0.0
-            val bmi = backStackEntry.arguments?.getString("bmi")?.toDoubleOrNull() ?: 0.0
 
-            TipsScreen(name, weight, bmi, navController)
+            val weight = backStackEntry.arguments
+                ?.getString("weight")
+                ?.toDoubleOrNull() ?: 0.0
+
+            val bmi = backStackEntry.arguments
+                ?.getString("bmi")
+                ?.toDoubleOrNull() ?: 0.0
+
+            val gender = backStackEntry.arguments
+                ?.getString("gender") ?: "Other"
+
+            TipsScreen(name, weight, bmi, gender, navController)
         }
+
 
 
 
@@ -344,9 +368,9 @@ fun AppNavGraph(startDestination: String) {
                 onAddClick = {
                     navController.navigate("profile")
                 },
-                    onProfileClick = { profileId, name ->
+                    onProfileClick = { id, name, gender ->
                         navController.navigate(
-                            "bmi/$profileId/${Uri.encode(name)}"
+                            "bmi/$id/${Uri.encode(name)}/$gender"
                         )
                     },
                 onLogoutClick = {
