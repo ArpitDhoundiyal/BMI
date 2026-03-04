@@ -1,10 +1,7 @@
-package com.example.bmi.presentation.auth
-import android.app.Activity
-import android.util.Log
+package com.example.bmi.ui.screens
+import android.util.Patterns
 import com.example.bmi.R
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -31,11 +28,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bmi.presentation.auth.AuthViewModel
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
 
 
 @Composable
@@ -44,7 +39,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onGoogleLoginClick: () -> Unit
 ) {
-
+    val viewModel: AuthViewModel = viewModel()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -100,7 +95,7 @@ fun LoginScreen(
                     ),
                     keyboardActions = KeyboardActions(
                         onNext = {
-                            if (android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                            if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                                 passwordFocusRequester.requestFocus()
                             } else {
                                 Toast.makeText(context, "Invalid Email", Toast.LENGTH_SHORT).show()
@@ -186,17 +181,20 @@ fun LoginScreen(
                         return@TextButton
                     }
 
-                    FirebaseAuth.getInstance()
-                        .sendPasswordResetEmail(email)
-                        .addOnSuccessListener {
+                    viewModel.resetPassword(
+                        email,
+                        onSuccess = {
                             Toast.makeText(context, "Reset link sent", Toast.LENGTH_SHORT).show()
-                        }
-                        .addOnFailureListener {
-                            Toast.makeText(context, "Failed to send reset email", Toast.LENGTH_SHORT).show()
-                        }
+                        },
+                        onError = {
+                            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        },
+
+                    )
                 }) {
                     Text("Forgot Password?")
                 }
+
 
                 TextButton(onClick = {
                     onNavigateToRegister()
