@@ -109,3 +109,11 @@
 <div align="">
   <p><i>Developed as a demonstration of clean, responsive UI and AI-driven health suggestions.</i></p>
 </div>
+
+<h2>Updates </h2>
+click here to see demo and updates
+
+
+https://github.com/user-attachments/assets/2da4f2b1-a6f6-4d50-8259-df0bf6441a8f
+
+
